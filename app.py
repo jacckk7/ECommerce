@@ -1,13 +1,20 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
 
 # Instanciando e configura aplicação e cria banco de dados
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ecommerce.db'
 
 db = SQLAlchemy(app)
+# Permite que outros sistemas de fora acessem o banco 
+CORS(app)
 
 # Modelagem
+# flask shell
+# db.create_all()
+# db.session.commit()
+# exit()
 # Produto (id, name, price, description)
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -35,6 +42,52 @@ def delete_product(product_id):
         return jsonify({"message": "Product deleted successfully"})
     
     return jsonify({"message": "Product not found"}), 404
+
+@app.route('/api/products/<int:product_id>', methods=["GET"])
+def get_product_details(product_id):
+    product= Product.query.get(product_id)
+    if product:
+        return jsonify({
+            "id": product.id,
+            "name": product.name,
+            "price": product.price,
+            "description": product.description
+        })
+        
+    return jsonify({"message": "Product not found"}), 404
+
+@app.route('/api/products/update/<int:product_id>', methods=["PUT"])
+def update_product(product_id):
+    product = Product.query.get(product_id)
+    if not product:
+        return jsonify({"message": "Product not found"}), 404
+    
+    data = request.json
+    if 'name' in data:
+        product.name = data["name"]
+        
+    if 'price' in data:
+        product.dat = data["price"]
+        
+    if 'description' in data:
+        product.description = data["description"]
+    
+    db.session.commit()
+    return jsonify({"message": "Product updated successfully"})
+
+@app.route('/api/products', methods=["GET"])
+def get_products():
+    products = Product.query.all()
+    product_list = []
+    for product in products:
+        product_data = {
+            "id": product.id,
+            "name": product.name,
+            "price": product.price
+        }
+        product_list.append(product_data)
+        
+    return jsonify(product_list)
 
 # Definindo uma rota raiz (página inicial) e a função que será executada ao requisitar
 @app.route('/')
