@@ -1,3 +1,4 @@
+# pip3 install -r .\requirements.txt 
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
@@ -196,4 +197,4 @@ def hello_world():
 
 # Roda a aplicação apenas se for a primeria instância (evita redundância)
 if __name__=='__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000)
